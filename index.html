@@ -679,14 +679,8 @@ function renderAdmin() {
 function copyAll() {
   if (!feedbackEntries.length) { showToast('No responses yet.'); return; }
   const text = feedbackEntries.map((e,i)=>
-    `--- Response #${i+1} (${e.time}) ---
-Rating: ${e.rating}
-Working: ${e.working}
-Improve: ${e.improve}
-Thoughts: ${e.thoughts}`
-  ).join('
-
-');
+    '--- Response #' + (i+1) + ' (' + e.time + ') ---\nRating: ' + e.rating + '\nWorking: ' + e.working + '\nImprove: ' + e.improve + '\nThoughts: ' + e.thoughts
+  ).join('\n\n');
   navigator.clipboard.writeText(text).then(()=>showToast('Copied!'));
 }
 
