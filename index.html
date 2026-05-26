@@ -110,10 +110,6 @@ nav{position:sticky;top:0;z-index:200;background:rgba(253,248,244,.93);backdrop-
 .reply-btn:disabled{opacity:.5;cursor:not-allowed}
 
 .empty{text-align:center;padding:3rem 1rem;color:var(--muted);font-size:14px;font-weight:600}
-.spinner-wrap{text-align:center;padding:3rem 1rem}
-.spinner{width:28px;height:28px;border:3px solid var(--lav2);border-top-color:var(--lav3);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
-@keyframes spin{to{transform:rotate(360deg)}}
-.spinner-label{font-size:13px;color:var(--muted);font-weight:600}
 
 /* FEEDBACK */
 .fb-wrap{max-width:560px;margin:0 auto;padding:2rem 1.25rem 5rem}
@@ -312,15 +308,6 @@ async function apiPost(body) {
 
 // ── AI MODERATION ──
 async function checkWithAI(text) {
-  // Backup filter — catches obvious stuff if AI fails
-  const lower = text.toLowerCase();
-  const badWords = ['poop','pee','shit','fuck','ass','bitch','damn','crap','dick','cock','pussy','sex','nude','porn','kill','die','hate','stupid','idiot','dumb','ugly','freak','weird','hell','fart','butt','turd','caca'];
-  const pureChatter = ['poopoo','peepee','lmao','omg','wtf','im bored','im tired','im hungry','im sad','i hate mondays','random','testing','test post','first post'];
-  const studyWords = ['help','study','homework','class','teacher','school','math','science','english','history','biology','chemistry','physics','essay','test','quiz','exam','assignment','question','explain','understand','learn','tip','playlist','subject','grade','problem','chapter','notes'];
-  const hasStudyContent = studyWords.some(w => lower.includes(w));
-  if (badWords.some(w => lower.includes(w))) return { allowed: false, reason: "Please keep posts appropriate and school-related." };
-  if (pureChatter.some(w => lower.includes(w)) && !hasStudyContent) return { allowed: false, reason: "Please post study-related content only — ask a question, share a tip, or post a playlist." };
-  if (!hasStudyContent && lower.length < 20) return { allowed: false, reason: "Please post study-related content only — ask a question, share a tip, or post a playlist." };
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -341,13 +328,10 @@ BLOCK everything else, no exceptions, including:
 - Social chat, greetings, or anything not directly about studying ("how's life", "what's up chat", "anyone here", "how's everyone doing", "good morning")
 - Self-comments or expressions unrelated to studying ("I'm an idiot", "I'm tired", "I hate Mondays", "I'm bored")
 - Vague messages that aren't clearly about a specific study topic ("help", "anyone?", "this is hard", "ugh")
-- Requests for answers or completed work ("who has the answers", "what's the answer to #3", "what did you get for question 5", "does anyone have the answer key", "can someone send me the answers")
-- Sharing direct answers to assignments ("the answer is 42", "question 3 is B", listing answers without explanation)
+- Direct homework answers without any explanation or teaching ("the answer is 42", "question 3 is B", just listing answers)
 - Insults or put-downs toward anyone, including oneself ("freak you", "ur weird", "you're dumb", "I'm an idiot", "this teacher is stupid")
 - Profanity or inappropriate language, including mild, abbreviated, or disguised versions
 - Anything not clearly and specifically about school subjects or studying
-
-CRITICAL RULE: Any post asking for answers, shortcuts, or completed work must be BLOCKED. "Who has the answers to #3" = BLOCK. "What did you get for the homework" = BLOCK. Only allow posts genuinely trying to understand a concept.
 
 The test: ask yourself "Is this message clearly about helping someone study or learn a school subject?" If the answer is anything other than a clear YES, block it.
 
@@ -428,7 +412,7 @@ function timeAgo(ts) {
 
 async function loadPosts() {
   const container = document.getElementById('posts-container');
-  container.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div><div class="spinner-label">Loading posts...</div></div>';
+  container.innerHTML = '<div class="empty">Loading posts...</div>';
   try {
     const data = await apiGet({ action: 'getPosts' });
     posts = Array.isArray(data) ? data : [];
