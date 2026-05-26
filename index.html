@@ -315,9 +315,12 @@ async function checkWithAI(text) {
   // Backup filter — catches obvious stuff if AI fails
   const lower = text.toLowerCase();
   const badWords = ['poop','pee','shit','fuck','ass','bitch','damn','crap','dick','cock','pussy','sex','nude','porn','kill','die','hate','stupid','idiot','dumb','ugly','freak','weird','hell','fart','butt','turd','caca'];
-  const offTopic = ['poopoo','peepee','haha','lol','lmao','omg','wtf','bruh','bro','sis','hi ','hello ','hey ','yo ','sup ','what up','whats up','how are','how r u','good morning','good night','im bored','im bored','im tired','im tired','im hungry','im hungry','im sad','im sad','i hate mondays','random','testing','test post','first post'];
+  const pureChatter = ['poopoo','peepee','lmao','omg','wtf','im bored','im tired','im hungry','im sad','i hate mondays','random','testing','test post','first post'];
+  const studyWords = ['help','study','homework','class','teacher','school','math','science','english','history','biology','chemistry','physics','essay','test','quiz','exam','assignment','question','explain','understand','learn','tip','playlist','subject','grade','problem','chapter','notes'];
+  const hasStudyContent = studyWords.some(w => lower.includes(w));
   if (badWords.some(w => lower.includes(w))) return { allowed: false, reason: "Please keep posts appropriate and school-related." };
-  if (offTopic.some(w => lower.includes(w)) && lower.length < 60) return { allowed: false, reason: "Please post study-related content only — ask a question, share a tip, or post a playlist." };
+  if (pureChatter.some(w => lower.includes(w)) && !hasStudyContent) return { allowed: false, reason: "Please post study-related content only — ask a question, share a tip, or post a playlist." };
+  if (!hasStudyContent && lower.length < 20) return { allowed: false, reason: "Please post study-related content only — ask a question, share a tip, or post a playlist." };
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
